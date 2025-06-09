@@ -8,9 +8,8 @@ class RegistrationStates(StatesGroup):
     complete = State()
 
 
-class BasketStates(StatesGroup):
-    view_order = State()
-    address = State()
-    time = State()
+class OrderStates(StatesGroup):
+    start_order = State()
+    size = State()
+    additives = State()
     confirm = State()
-    payment = State()
