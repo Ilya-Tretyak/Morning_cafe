@@ -2,6 +2,7 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 
 def get_menu_navigation_keyboard(product_id: int) -> InlineKeyboardMarkup:
+    """Inline-навигация для позиций в меню"""
     return InlineKeyboardMarkup(inline_keyboard=[
         [
             InlineKeyboardButton(text="⬅️ Назад", callback_data="prev_item"),
@@ -11,6 +12,7 @@ def get_menu_navigation_keyboard(product_id: int) -> InlineKeyboardMarkup:
         [InlineKeyboardButton(text="❌ Закрыть", callback_data="close_menu")]
     ])
 
+"""Inline-keyboard размера напитка"""
 sizes_inline_keyboard = InlineKeyboardMarkup(
     inline_keyboard=[
         [InlineKeyboardButton(text="S (250 мл.) ☕️", callback_data="size:1")],
@@ -19,6 +21,7 @@ sizes_inline_keyboard = InlineKeyboardMarkup(
     ]
 )
 
+"""Inline-keyboard выбора допов"""
 additives_inline_keyboard = InlineKeyboardMarkup(
     inline_keyboard=[
         [InlineKeyboardButton(text="Сахар 🧂", callback_data="additives:1")],
@@ -28,9 +31,25 @@ additives_inline_keyboard = InlineKeyboardMarkup(
     ]
 )
 
+"""Inline-keyboard добавления или отмены заказа"""
 add_in_basket_keyboard = InlineKeyboardMarkup(
     inline_keyboard=[
         [InlineKeyboardButton(text="Добавить в корзину ✅", callback_data="add_in_basket")],
         [InlineKeyboardButton(text="❎ Отменить заказ", callback_data="dont_add_in_basket")],
     ]
 )
+
+def basket_navigation_keyboard(basket_id):
+    """Inline-keyboard навигация для корзины"""
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [
+            InlineKeyboardButton(text="⬅️", callback_data="basket_prev"),
+            InlineKeyboardButton(text="➡️", callback_data="basket_next")
+        ],
+        [
+            InlineKeyboardButton(text="🗑️ Удалить", callback_data=f"basket_delete:{basket_id}")
+        ],
+        [
+            InlineKeyboardButton(text="✅ Оформить заказ", callback_data="basket_checkout")
+        ]
+    ])

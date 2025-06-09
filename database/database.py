@@ -2,7 +2,6 @@ import json
 import sqlite3
 from sqlite3 import Error
 from datetime import datetime
-from typing import Dict, List
 
 
 def create_connection():
@@ -16,6 +15,7 @@ def create_connection():
     return conn
 
 def create_table():
+    """Создание таблиц базы данных"""
     conn = create_connection()
     try:
         cursor = conn.cursor()
@@ -45,7 +45,7 @@ def create_table():
         cursor.execute('''
         CREATE TABLE IF NOT EXISTS sizes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT NOT NULL UNIQUE,
+            title TEXT NOT NULL,
             multiplier REAL NOT NULL
             )
         ''')
@@ -54,11 +54,22 @@ def create_table():
         cursor.execute('''
         CREATE TABLE IF NOT EXISTS additives (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT NOT NULL UNIQUE,
+            title TEXT NOT NULL,
             price INTEGER NOT NULL 
             )
         ''')
         print("Таблица additives - Done!")
+
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS basket (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            product_id INTEGER NOT NULL,
+            size_id INTEGER NOT NULL,
+            additive_id INTEGER NOT NULL 
+            )
+        ''')
+        print("Таблица basket - Done!")
 
         cursor.execute('''
         CREATE TABLE IF NOT EXISTS orders (
@@ -89,6 +100,7 @@ def create_table():
         print(f"Ошибка при создании таблиц: {e}")
 
 def add_user(user_id: int, username: str, full_name: str, phone_number: str):
+    """Добавление нового пользователя в БД"""
     conn = create_connection()
     try:
         cursor = conn.cursor()
@@ -104,6 +116,7 @@ def add_user(user_id: int, username: str, full_name: str, phone_number: str):
 
 
 def is_user_registered(user_id: int):
+    """Проверка наличия ID пользователя в БД"""
     conn = create_connection()
     try:
         cursor = conn.cursor()
@@ -115,6 +128,7 @@ def is_user_registered(user_id: int):
 
 
 def get_menu():
+    """Получение всей информации из таблицы menu"""
     conn = create_connection()
     try:
         cursor = conn.cursor()
@@ -125,6 +139,7 @@ def get_menu():
         return False
 
 def get_sizes():
+    """Получение всей информации из таблицы size"""
     conn = create_connection()
     try:
         cursor = conn.cursor()
@@ -135,6 +150,7 @@ def get_sizes():
         return False
 
 def get_additives():
+    """Получение всей информации из таблицы additives"""
     conn = create_connection()
     try:
         cursor = conn.cursor()
@@ -144,7 +160,47 @@ def get_additives():
         print(f"Ошибка при получение данных с таблицы additives: {e}")
         return False
 
+def add_item_in_basket(user_id: int, product_id: int, size_id: int, additive_id: int):
+    """Добавление новой записи в таблицу basket"""
+    conn = create_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO basket (user_id, product_id, size_id, additive_id) VALUES (?, ?, ?, ?)",
+            (user_id, product_id, size_id, additive_id)
+        )
+        conn.commit()
+        print(f"Товар {product_id} успешно добавлен в корзину.")
+    except Error as e:
+        print(f"Ошибка при добавлении товара {product_id}: {e}")
+
+
+def get_users_basket(user_id: int):
+    """Получение всей информации из таблицы basket для определенного user`а"""
+    conn = create_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM basket WHERE user_id = ?', (user_id,))
+        return cursor.fetchall()
+    except Error as e:
+        print(f"Ошибка при получении корзины пользователя {user_id}: {e}")
+        return False
+
+
+def del_item_in_basket(basket_id: int):
+    """Удаление записи из таблицы basket по basket_id"""
+    conn = create_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM basket WHERE id = ?", (basket_id,))
+        conn.commit()
+    except Error as e:
+        print(f"Ошибка при удалении позиции {basket_id}: {e}")
+
+
+
 def create_order(user_id: int, items: list, address: str):
+    """Создание новой записи в таблице order"""
     total = 0
     items_json = json.dumps(items)
 

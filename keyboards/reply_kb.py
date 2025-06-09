@@ -4,6 +4,7 @@ from aiogram.types import (
 )
 
 
+"""Reply-keyboard главного меню"""
 main_keyboard = ReplyKeyboardMarkup(
     keyboard=[
         [KeyboardButton(text="Меню ☕️")],
@@ -11,6 +12,8 @@ main_keyboard = ReplyKeyboardMarkup(
     ],
     resize_keyboard=True
 )
+
+"""Reply-keyboard начало регистрации"""
 start_register_keyboard = ReplyKeyboardMarkup(
     keyboard=[
         [KeyboardButton(text="Зарегистрироваться✍️")],
@@ -18,6 +21,7 @@ start_register_keyboard = ReplyKeyboardMarkup(
     resize_keyboard=True
 )
 
+"""Reply-keyboard да\нет"""
 yes_or_no_keyboard = ReplyKeyboardMarkup(
     keyboard=[
         [KeyboardButton(text="Да✅"), KeyboardButton(text="Нет❌")],

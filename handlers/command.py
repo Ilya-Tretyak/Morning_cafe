@@ -14,6 +14,7 @@ bot = Bot(token=BOT_TOKEN)
 
 @router.message(Command("start"))
 async def start_handler(message: Message, state: FSMContext):
+    """Обработчик команды /start"""
     if is_user_registered(message.from_user.id):
         await message.answer_photo(
             photo=FSInputFile("database/images/dopping.jpg"),

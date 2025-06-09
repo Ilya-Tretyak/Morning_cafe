@@ -13,8 +13,13 @@ bot = Bot(token=BOT_TOKEN)
 
 @router.message(F.text=="Зарегистрироваться✍️", RegistrationStates.full_name)
 async def full_name_handler(message: Message, state: FSMContext):
-    await message.delete()
-    await bot.delete_message(message.chat.id, message.message_id - 1)
+    """Начало регистрации -> ввод имени"""
+    try:
+        await message.delete()
+        await bot.delete_message(message.chat.id, message.message_id - 1)
+    except Exception as e:
+        print(f"Не удалось удалить сообщение: {e}")
+
     await message.answer(
         f"Введите свое имя:",
         reply_markup=ReplyKeyboardRemove()
@@ -24,6 +29,7 @@ async def full_name_handler(message: Message, state: FSMContext):
 
 @router.message(RegistrationStates.phone_number)
 async def phone_number_handler(message: Message, state: FSMContext):
+    """Получение номера телефона"""
     await state.update_data(full_name=message.text)
 
     await message.delete()
@@ -37,6 +43,7 @@ async def phone_number_handler(message: Message, state: FSMContext):
 
 @router.message(RegistrationStates.confirm)
 async def confirm_handler(message: Message, state: FSMContext):
+    """Проверка введенных данных"""
     await state.update_data(phone_number=message.text)
 
     await message.delete()
@@ -55,6 +62,7 @@ async def confirm_handler(message: Message, state: FSMContext):
 
 @router.message(F.text=="Да✅", RegistrationStates.complete)
 async def complete_handler(message: Message, state: FSMContext):
+    """Завершение регистрации"""
     await message.delete()
     await bot.delete_message(message.chat.id, message.message_id - 1)
 
@@ -73,6 +81,7 @@ async def complete_handler(message: Message, state: FSMContext):
 
 @router.message(F.text == "Нет❌", RegistrationStates.complete)
 async def not_register_handler(message: Message, state: FSMContext):
+    """Переход в начало регистрации"""
     await message.delete()
     await bot.delete_message(message.chat.id, message.message_id - 1)
 
