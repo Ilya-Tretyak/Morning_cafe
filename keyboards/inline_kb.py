@@ -24,10 +24,11 @@ sizes_inline_keyboard = InlineKeyboardMarkup(
 """Inline-keyboard выбора допов"""
 additives_inline_keyboard = InlineKeyboardMarkup(
     inline_keyboard=[
-        [InlineKeyboardButton(text="Сахар 🧂", callback_data="additives:1")],
         [InlineKeyboardButton(text="Молоко 🥛", callback_data="additives:2")],
         [InlineKeyboardButton(text="Корица 🧂", callback_data="additives:3")],
-        [InlineKeyboardButton(text="Лимон 🍋", callback_data="additives:4")],
+        [InlineKeyboardButton(text="Сахар 🧂", callback_data="additives:4")],
+        [InlineKeyboardButton(text="Лимон 🍋", callback_data="additives:5")],
+        [InlineKeyboardButton(text="Ничего ❌", callback_data="additives:1")]
     ]
 )
 

@@ -108,13 +108,14 @@ async def navigate_basket(callback: CallbackQuery, state: FSMContext):
 
 
 @router.callback_query(F.data.startswith("basket_delete:"))
-async def delete_basket(callback: CallbackQuery, state: FSMContext):
+async def delete_item_in_basket(callback: CallbackQuery, state: FSMContext):
     """Удаления позиции из корзины пользователем"""
     basket_id = int(callback.data.split(":")[1])
     del_item_in_basket(basket_id)
 
     basket = get_users_basket(callback.from_user.id)
     if not basket:
+        await callback.message.delete()
         await callback.message.answer("🧺 Ваша корзина пуста.")
         await state.clear()
         await callback.answer()

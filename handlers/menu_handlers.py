@@ -70,9 +70,9 @@ async def handle_user_navigation(callback: CallbackQuery, state: FSMContext):
     menu = data['menu']
 
     if callback.data == "prev_item":
-        new_index = max(0, current_index - 1)
+        new_index = (current_index - 1) % len(menu)
     elif callback.data == "next_item":
-        new_index = min(len(menu) - 1, current_index + 1)
+        new_index = (current_index + 1) % len(menu)
     else:
         await callback.message.delete()
         await state.clear()
