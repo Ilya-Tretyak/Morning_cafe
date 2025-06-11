@@ -2,6 +2,8 @@ from aiogram import Router, F, Bot
 from aiogram.types import CallbackQuery, FSInputFile, InputMediaPhoto, Message
 from aiogram.fsm.context import FSMContext
 
+from typing import Union
+
 from config.settings import BOT_TOKEN
 from handlers.menu_handlers import menu_handler
 from keyboards import inline_kb
@@ -21,10 +23,22 @@ additives = {a[0]: a for a in get_additives()}
 menu = {m[0]: m for m in get_menu()}
 
 
-@router.message(F.text == "Корзина 🗑️")
-async def show_users_basket(message: Message, state: FSMContext):
+@router.message(F.text == "Корзина 🧺")
+@router.callback_query(F.data == "basket")
+async def show_users_basket(
+        update: Union[Message, CallbackQuery],
+        state: FSMContext
+):
     """Получения пользователем совей корзины"""
-    basket = get_users_basket(message.from_user.id)
+    if isinstance(update, CallbackQuery):
+        message = update.message
+        user_id = update.from_user.id
+        await update.answer()
+    else:
+        message = update
+        user_id = update.from_user.id
+
+    basket = get_users_basket(user_id)
 
     if not basket:
         await message.answer("🧺 Ваша корзина пуста.")
@@ -198,3 +212,14 @@ async def add_in_basket(callback: CallbackQuery, state: FSMContext):
     await menu_handler(callback.message, state)
 
     await callback.answer()
+
+
+@router.callback_query(F.data.startswith("dont_add_in_basket"))
+async def add_in_basket(callback: CallbackQuery, state: FSMContext):
+    await callback.answer("Заказ позиции отменен!", show_alert=True)
+    await state.clear()
+    await menu_handler(callback.message, state)
+
+    await callback.answer()
+
+

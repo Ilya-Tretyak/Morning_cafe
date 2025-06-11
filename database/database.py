@@ -76,9 +76,8 @@ def create_table():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER NOT NULL,
             items_json TEXT NOT NULL,
+            status TEXT NOT NULL DEFAULT 'Ожидает',
             total_price INTEGER NOT NULL,
-            address TEXT NOT NULL,
-            status TEXT NOT NULL DEFAULT 'new',
             created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users(user_id)
             )
@@ -199,22 +198,62 @@ def del_item_in_basket(basket_id: int):
 
 
 
-def create_order(user_id: int, items: list, address: str):
+def create_order(user_id: int, total_price: int):
     """Создание новой записи в таблице order"""
-    total = 0
-    items_json = json.dumps(items)
+    conn = create_connection()
+    cursor = conn.cursor()
 
+    basket = get_users_basket(user_id)
+    if not basket:
+        conn.close()
+        return print("Корзина пользователя пуста")
+
+    items_json = []
+    for row in basket:
+        basket_id, user_id, product_id, size_id, additive_id = row
+        items_json.append({
+            'product_id': product_id,
+            'size_id': size_id,
+            'additive_id': additive_id
+        })
+
+    cursor.execute('''
+        INSERT INTO orders (user_id, items_json, total_price, created_at)
+        VALUES (?, ?, ?, ?)''',(
+        user_id,
+        json.dumps(items_json),
+        total_price,
+        datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    ))
+
+    cursor.execute("DELETE FROM basket WHERE user_id = ?", (user_id,))
+
+    conn.commit()
+    order_id = cursor.lastrowid
+    conn.close()
+    return order_id
+
+def get_users_orders(user_id: int):
+    """Получение заказов определенного пользователя"""
     conn = create_connection()
     try:
         cursor = conn.cursor()
-        cursor.execute(
-            "INSERT INTO orders (user_id, items_json, total_price, address) VALUES (?, ?, ?, ?)",
-            (user_id, items_json, total, address)
-        )
-        conn.commit()
-        print(f"Заказ пользователя ID: {user_id} - Done!")
+        cursor.execute("SELECT * FROM orders WHERE user_id = ?", (user_id,))
+        return cursor.fetchall()
     except Error as e:
-        print(f"Ошибка при создании заказа: {e}")
+        print(f"Ошибка при получении заказа пользователя {user_id}: {e}")
+        return False
+
+
+def get_all_orders():
+    conn = create_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM orders")
+        return cursor.fetchall()
+    except Error as e:
+        print(f"Ошибка при получении заказов: {e}")
+        return False
 
 
 conn = create_connection()

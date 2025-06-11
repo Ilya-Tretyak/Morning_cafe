@@ -9,6 +9,7 @@ def get_menu_navigation_keyboard(product_id: int) -> InlineKeyboardMarkup:
             InlineKeyboardButton(text="Далее ➡️", callback_data="next_item")
         ],
         [InlineKeyboardButton(text="Добавить➕", callback_data=f"add_to_order:{product_id}")],
+        [InlineKeyboardButton(text="Корзина 🧺", callback_data=f"basket")],
         [InlineKeyboardButton(text="❌ Закрыть", callback_data="close_menu")]
     ])
 
@@ -36,7 +37,7 @@ additives_inline_keyboard = InlineKeyboardMarkup(
 add_in_basket_keyboard = InlineKeyboardMarkup(
     inline_keyboard=[
         [InlineKeyboardButton(text="Добавить в корзину ✅", callback_data="add_in_basket")],
-        [InlineKeyboardButton(text="❎ Отменить заказ", callback_data="dont_add_in_basket")],
+        [InlineKeyboardButton(text="❎ Отменить заказ", callback_data="dont_add_in_basket")]
     ]
 )
 
@@ -54,3 +55,9 @@ def basket_navigation_keyboard(basket_id):
             InlineKeyboardButton(text="✅ Оформить заказ", callback_data="basket_checkout")
         ]
     ])
+
+orders_button = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [InlineKeyboardButton(text="Заказы 📝", callback_data="orders")],
+    ]
+)

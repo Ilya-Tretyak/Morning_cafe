@@ -8,7 +8,8 @@ from aiogram.types import (
 main_keyboard = ReplyKeyboardMarkup(
     keyboard=[
         [KeyboardButton(text="Меню ☕️")],
-        [KeyboardButton(text="Корзина 🗑️")],
+        [KeyboardButton(text="Корзина 🧺")],
+        [KeyboardButton(text="Заказы 📝")],
     ],
     resize_keyboard=True
 )
@@ -27,4 +28,12 @@ yes_or_no_keyboard = ReplyKeyboardMarkup(
         [KeyboardButton(text="Да✅"), KeyboardButton(text="Нет❌")],
     ],
     resize_keyboard=True
+)
+
+admin_menu_keyboard = ReplyKeyboardMarkup(
+    keyboard=[
+        [KeyboardButton(text="Товары 🛒")],
+        [KeyboardButton(text="Заказы 📥")],
+        [KeyboardButton(text="Выручка 💸")]
+    ]
 )

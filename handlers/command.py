@@ -3,7 +3,7 @@ from aiogram.filters import Command
 from aiogram.types import Message, FSInputFile
 from aiogram.fsm.context import FSMContext
 
-from config.settings import BOT_TOKEN
+from config.settings import BOT_TOKEN, ADMINS_ID
 from keyboards import reply_kb
 from database.database import is_user_registered
 from ustils.state import RegistrationStates
@@ -26,4 +26,15 @@ async def start_handler(message: Message, state: FSMContext):
         await message.answer(
             f"Чтобы совершать заказы давайте познакомимся😉",
             reply_markup=reply_kb.start_register_keyboard
+        )
+
+
+@router.message(Command("admin"))
+async def admin_handler(message: Message):
+    if message.from_user.id in ADMINS_ID:
+        await message.answer("Админ-панель:", reply_markup=reply_kb.admin_menu_keyboard)
+    else:
+        await message.answer(
+            "К сожалению у вам нет доступа к админ-панели! Посмотрим меню?",
+            reply_markup=reply_kb.main_keyboard
         )
