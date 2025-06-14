@@ -113,6 +113,16 @@ def add_user(user_id: int, username: str, full_name: str, phone_number: str):
     except Error as e:
         print(f"Ошибка при добавлении пользователя ID: {user_id} : {e}")
 
+def get_user(user_id):
+    conn = create_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM users WHERE user_id = ?', (user_id,))
+        return cursor.fetchone()
+    except Error as e:
+        print(f"Ошибка при получение списка пользователей: {e}")
+        return False
+
 
 def is_user_registered(user_id: int):
     """Проверка наличия ID пользователя в БД"""
@@ -244,6 +254,14 @@ def get_users_orders(user_id: int):
         print(f"Ошибка при получении заказа пользователя {user_id}: {e}")
         return False
 
+def switch_status_order(order_id, new_status):
+    conn = create_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("UPDATE orders SET status = ? WHERE id = ?", (new_status, order_id))
+        conn.commit()
+    except Error as e:
+        print(f"Ошибка при изменении статуса для заказа {order_id}: {e}")
 
 def get_all_orders():
     conn = create_connection()
@@ -254,6 +272,31 @@ def get_all_orders():
     except Error as e:
         print(f"Ошибка при получении заказов: {e}")
         return False
+
+
+def add_item(title:str, description:str, price:int, image_path: str):
+    conn = create_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO menu (title, description, price, image_path) VALUES (?, ?, ?, ?)",
+            (title, description, price, image_path)
+        )
+        conn.commit()
+        print(f"Товар {title} успешно создан!.")
+    except Error as e:
+        print(f"Ошибка при создании товара {title}: {e}")
+
+def delete_item(item_id: int):
+    conn = create_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM menu WHERE id = ?", (item_id,))
+        conn.commit()
+    except Error as e:
+        print(f"Ошибка при удалении товара {item_id}: {e}")
+    finally:
+        conn.close()
 
 
 conn = create_connection()

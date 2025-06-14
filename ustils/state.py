@@ -15,3 +15,13 @@ class OrderStates(StatesGroup):
     size = State()
     additives = State()
     confirm = State()
+
+
+class AdminCreateItemStates(StatesGroup):
+    """Состояния для создания новых позиций админом"""
+    start_create_item = State()
+    create_title_item = State()
+    create_description = State()
+    create_price = State()
+    create_image = State()
+

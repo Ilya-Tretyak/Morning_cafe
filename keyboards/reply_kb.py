@@ -30,10 +30,28 @@ yes_or_no_keyboard = ReplyKeyboardMarkup(
     resize_keyboard=True
 )
 
+cancel_keyboard = ReplyKeyboardMarkup(
+    keyboard=[
+        [KeyboardButton(text="🔙Отменить")],
+    ],
+    resize_keyboard=True
+)
+
 admin_menu_keyboard = ReplyKeyboardMarkup(
     keyboard=[
         [KeyboardButton(text="Товары 🛒")],
         [KeyboardButton(text="Заказы 📥")],
-        [KeyboardButton(text="Выручка 💸")]
-    ]
+        [KeyboardButton(text="🔙 В главное меню")],
+    ],
+    resize_keyboard=True
+)
+
+
+admin_menu_products_keyboard = ReplyKeyboardMarkup(
+    keyboard=[
+        [KeyboardButton(text="Добавить позицию в меню ➕")],
+        [KeyboardButton(text="Удалить позицию из меню ❌")],
+        [KeyboardButton(text="🔙 Назад")]
+    ],
+    resize_keyboard=True
 )

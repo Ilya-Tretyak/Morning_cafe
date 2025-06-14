@@ -61,3 +61,33 @@ orders_button = InlineKeyboardMarkup(
         [InlineKeyboardButton(text="Заказы 📝", callback_data="orders")],
     ]
 )
+
+def delete_item_navigation_keyboard(product_id: int) -> InlineKeyboardMarkup:
+    """Inline-навигация для позиций в меню-удаление"""
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [
+            InlineKeyboardButton(text="⬅️ Назад", callback_data="prev_item"),
+            InlineKeyboardButton(text="Далее ➡️", callback_data="next_item")
+        ],
+        [InlineKeyboardButton(text="❌ Удалить", callback_data=f"delete_item")],
+    ])
+
+def get_admin_all_orders_keyboard(order_id: int) -> InlineKeyboardMarkup:
+    """Inline-навигация по заказам для админа"""
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="Посмотреть заказ 📥", callback_data=f"switch_status:{order_id}")],
+            [
+                InlineKeyboardButton(text="⬅️ Назад", callback_data="prev_order"),
+                InlineKeyboardButton(text="Далее ➡️", callback_data="next_order")
+            ],
+            [InlineKeyboardButton(text="Изменить статус заказа 🕚", callback_data=f"switch_status:{order_id}")],
+    ])
+
+def status_order_keyboard() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="Готовиться", callback_data="update_status:cook")],
+            [InlineKeyboardButton(text="Заказ готов", callback_data="update_status:done")]
+        ]
+    )

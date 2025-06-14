@@ -1,11 +1,11 @@
 from aiogram import Router, F, Bot
-from aiogram.types import Message, FSInputFile, CallbackQuery
+from aiogram.exceptions import TelegramBadRequest
+from aiogram.types import Message, FSInputFile, CallbackQuery, InputMediaPhoto
 from aiogram.fsm.context import FSMContext
 
 from config.settings import BOT_TOKEN
 from keyboards import inline_kb
-from database.database import get_menu
-
+from database.database import get_menu, delete_item
 
 router = Router()
 bot = Bot(token=BOT_TOKEN)
@@ -19,23 +19,13 @@ async def menu_handler(message: Message, state: FSMContext):
         return
 
     await state.clear()
-    await state.update_data(menu=menu, current_index=0)
+    await state.update_data(menu=menu, current_index=0, delete_item=False)
     await show_menu(message, state)
 
 
-async def show_menu(message: Message, state: FSMContext):
+async def show_menu(message_or_callback, state: FSMContext, is_navigation=False):
     """Отображение меню для пользователя"""
-    try:
-        await message.delete()
-    except ValueError:
-        pass
-
     data = await state.get_data()
-
-    if 'menu' not in data or 'current_index' not in data:
-        await message.answer("⚠️ Ошибка загрузки меню. Пожалуйста, откройте меню снова.")
-        return
-
     menu = data['menu']
     menu_item = menu[data['current_index']]
 
@@ -43,20 +33,47 @@ async def show_menu(message: Message, state: FSMContext):
             f"<i>{menu_item[2]} </i>\n\n"
             f"<b>Цена: {menu_item[3]} руб.</b>")
 
-    try:
-        await message.answer_photo(
-                photo=FSInputFile(menu_item[4]),
-                caption=text,
-                reply_markup=inline_kb.get_menu_navigation_keyboard(menu_item[0]),
-                parse_mode="HTML"
-        )
-    except FileNotFoundError:
-        await message.answer(
-            text=f"{text}\n\n⚠️ Фото не найдено",
-            reply_markup=inline_kb.get_menu_navigation_keyboard(menu_item[0])
-        )
+    if data['delete_item'] is False:
+        kb = inline_kb.get_menu_navigation_keyboard(menu_item[0])
+    else:
+        kb = inline_kb.delete_item_navigation_keyboard(menu_item[0])
 
-@router.callback_query(F.data.in_(["prev_item", "next_item", "close_menu"]))
+    try:
+        file = FSInputFile(menu_item[4])
+        if is_navigation:
+            await message_or_callback.edit_media(
+                media=InputMediaPhoto(
+                    media=file,
+                    caption=text,
+                    parse_mode="HTML"
+                ),
+                reply_markup=kb
+            )
+        else:
+            try:
+                await message_or_callback.delete()
+            except TelegramBadRequest:
+                pass
+            await message_or_callback.answer_photo(
+                photo=file,
+                caption=text,
+                reply_markup=kb,
+                parse_mode="HTML"
+            )
+    except FileNotFoundError:
+        if is_navigation:
+            await message_or_callback.message.edit_caption(
+                caption=f"{text}\n\n⚠️ Фото не найдено",
+                reply_markup=kb,
+                parse_mode="HTML"
+            )
+        else:
+            await message_or_callback.answer(
+                text=f"{text}\n\n⚠️ Фото не найдено",
+                reply_markup=kb
+            )
+
+@router.callback_query(F.data.in_(["prev_item", "next_item", "close_menu", "delete_item"]))
 async def handle_user_navigation(callback: CallbackQuery, state: FSMContext):
     """Реализация навигации"""
     data = await state.get_data()
@@ -73,11 +90,17 @@ async def handle_user_navigation(callback: CallbackQuery, state: FSMContext):
         new_index = (current_index - 1) % len(menu)
     elif callback.data == "next_item":
         new_index = (current_index + 1) % len(menu)
+    elif callback.data == "delete_item":
+        delete_item(menu[current_index][0])
+        await callback.answer(f"Позиция удалена из меню!", show_alert=True)
+        menu = get_menu()
+        await state.update_data(menu=menu)
+        new_index = (current_index - 1) % len(menu)
     else:
         await callback.message.delete()
         await state.clear()
         return
 
     await state.update_data(current_index=new_index)
-    await show_menu(callback.message, state)
+    await show_menu(callback.message, state, is_navigation=True)
     await callback.answer()

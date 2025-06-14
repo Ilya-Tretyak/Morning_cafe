@@ -1,4 +1,5 @@
 from aiogram import Router, F, Bot
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import Command
 from aiogram.types import Message, FSInputFile
 from aiogram.fsm.context import FSMContext
@@ -31,6 +32,11 @@ async def start_handler(message: Message, state: FSMContext):
 
 @router.message(Command("admin"))
 async def admin_handler(message: Message):
+    try:
+        await message.delete()
+    except TelegramBadRequest:
+        pass
+
     if message.from_user.id in ADMINS_ID:
         await message.answer("Админ-панель:", reply_markup=reply_kb.admin_menu_keyboard)
     else:

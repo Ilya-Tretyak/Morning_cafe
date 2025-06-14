@@ -8,11 +8,14 @@ from config.settings import BOT_TOKEN
 from handlers.menu_handlers import menu_handler
 from keyboards import inline_kb
 from ustils.state import OrderStates
-from database.database import (get_menu, get_sizes,
-                               get_additives,
-                               add_item_in_basket,
-                               get_users_basket,
-                               del_item_in_basket)
+from database.database import (
+    get_menu,
+    get_sizes,
+    get_additives,
+    add_item_in_basket,
+    get_users_basket,
+    del_item_in_basket
+)
 
 
 router = Router()
@@ -55,7 +58,7 @@ async def show_users_basket(
     await show_basket_item(message, state)
 
 
-async def show_basket_item(message_or_cb, state: FSMContext):
+async def show_basket_item(message_or_cb, state: FSMContext, is_navigation=False):
     """Отображение отдельной позиции из корзины с навигацией по ней"""
     data = await state.get_data()
     basket = data['basket']
@@ -88,19 +91,35 @@ async def show_basket_item(message_or_cb, state: FSMContext):
             f"----------------------\n"
             f"<b>Общая сумма корзины: {int(total_sum_item)} руб.</b>")
 
+    kb = inline_kb.basket_navigation_keyboard(basket_id)
+
     try:
-        await message_or_cb.answer_photo(
-            photo=FSInputFile(product[4]),
-            caption=text,
-            reply_markup=inline_kb.basket_navigation_keyboard(basket_id),
-            parse_mode="HTML"
-        )
+        photo = FSInputFile(product[4])
+        if is_navigation:
+            await message_or_cb.edit_media(
+                media=InputMediaPhoto(media=photo, caption=text, parse_mode="HTML"),
+                reply_markup=kb
+            )
+        else:
+            await message_or_cb.answer_photo(
+                photo=photo,
+                caption=text,
+                reply_markup=kb,
+                parse_mode="HTML"
+            )
     except FileNotFoundError:
-        await message_or_cb.answer(
-            text=f"{text}\n\n⚠️ Фото не найдено",
-            reply_markup=inline_kb.basket_navigation_keyboard(basket_id),
-            parse_mode="HTML"
-        )
+        if is_navigation:
+            await message_or_cb.edit_caption(
+                caption=f"{text}\n\n⚠️ Фото не найдено",
+                reply_markup=kb,
+                parse_mode="HTML"
+            )
+        else:
+            await message_or_cb.answer(
+                text=f"{text}\n\n⚠️ Фото не найдено",
+                reply_markup=kb,
+                parse_mode="HTML"
+            )
 
 
 @router.callback_query(F.data.in_(["basket_prev", "basket_next"]))
@@ -116,8 +135,7 @@ async def navigate_basket(callback: CallbackQuery, state: FSMContext):
         index = (index + 1) % len(basket)
 
     await state.update_data(current_index=index)
-    await callback.message.delete()
-    await show_basket_item(callback.message, state)
+    await show_basket_item(callback.message, state, is_navigation=True)
     await callback.answer()
 
 
@@ -136,7 +154,7 @@ async def delete_item_in_basket(callback: CallbackQuery, state: FSMContext):
         return
 
     await state.update_data(basket=basket, current_index=0)
-    await show_basket_item(callback.message, state)
+    await show_basket_item(callback.message, state, is_navigation=True)
     await callback.answer("Удалено ✅", show_alert=True)
 
 

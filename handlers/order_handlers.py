@@ -14,7 +14,7 @@ from database.database import (
     get_sizes,
     get_additives,
 )
-from keyboards import reply_kb, inline_kb
+from keyboards import inline_kb
 
 router = Router()
 bot = Bot(token=BOT_TOKEN)
