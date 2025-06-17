@@ -18,7 +18,7 @@ async def start_handler(message: Message, state: FSMContext):
     """Обработчик команды /start"""
     if is_user_registered(message.from_user.id):
         await message.answer_photo(
-            photo=FSInputFile("database/images/dopping.jpg"),
+            photo=FSInputFile("database/images/start.png"),
             caption=f"Добро пожаловать в Morning Cup ☕️\n\n",
             reply_markup=reply_kb.main_keyboard
         )

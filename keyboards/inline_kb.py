@@ -62,6 +62,13 @@ orders_button = InlineKeyboardMarkup(
     ]
 )
 
+def requested_orders_item_keyboard(order_id: int) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="Перейти к заказу ➡️", callback_data=f"requested_orders:{order_id}")],
+        ]
+    )
+
 def delete_item_navigation_keyboard(product_id: int) -> InlineKeyboardMarkup:
     """Inline-навигация для позиций в меню-удаление"""
     return InlineKeyboardMarkup(inline_keyboard=[

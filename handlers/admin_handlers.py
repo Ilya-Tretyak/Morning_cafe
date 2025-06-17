@@ -25,6 +25,7 @@ bot = Bot(token=BOT_TOKEN)
 
 @router.message(F.text=="Товары 🛒")
 async def admin_products_handler(message: Message):
+    """Переход в админ-меню продукта"""
     try:
         await message.delete()
     except TelegramBadRequest:
@@ -38,11 +39,13 @@ async def admin_products_handler(message: Message):
 
 @router.message(F.text=="🔙 Назад")
 async def back_to_main_admin_menu(message: Message):
+    """Возвращение в главное админ-меню"""
     return await admin_handler(message)
 
 
 @router.message(F.text=="Добавить позицию в меню ➕")
 async def start_create_products_handler(message: Message, state: FSMContext):
+    """Добавления нового товара"""
     try:
         await message.delete()
         await bot.delete_message(message.chat.id, message.message_id - 1)
@@ -152,6 +155,7 @@ async def create_process_photo(message: Message, state: FSMContext):
 
 @router.message(F.text=="Удалить позицию из меню ❌")
 async def delete_item_handler(message: Message, state: FSMContext):
+    """Удаление товара"""
     if message.from_user.id != message.chat.id:
         return
 
@@ -166,13 +170,26 @@ async def delete_item_handler(message: Message, state: FSMContext):
 
 
 @router.message(F.text=="Заказы 📥")
-async def admin_orders_handler(message: Message, state: FSMContext):
+@router.callback_query(F.data.startswith("requested_orders:"))
+async def admin_orders_handler(message_or_cb, state: FSMContext):
+    """Переход к заказам для АДМИНОВ"""
+    orders = get_all_orders()
+    if isinstance(message_or_cb, CallbackQuery):
+        message = message_or_cb.message
+        user_id = message_or_cb.from_user.id
+        order_id = int(message_or_cb.data.split(":")[1])
+        index = next((i for i, order in enumerate(orders) if order[0] == order_id), 0)
+
+    else:
+        message = message_or_cb
+        user_id = message_or_cb.from_user.id
+        index = 0
     try:
         await message.delete()
     except TelegramBadRequest:
         pass
 
-    if message.from_user.id not in ADMINS_ID:
+    if user_id not in ADMINS_ID:
         return
 
     orders = get_all_orders()
@@ -181,7 +198,7 @@ async def admin_orders_handler(message: Message, state: FSMContext):
         await message.answer("Активных заказов сейчас нет.")
         return
 
-    await state.update_data(orders=orders, current_index=0)
+    await state.update_data(orders=orders, current_index=index)
     await  show_all_orders(message, state)
 
 
@@ -190,6 +207,7 @@ async def show_all_orders(message_or_cb, state: FSMContext, is_navigation=False)
     orders = data['orders']
     index = data['current_index']
 
+    print(index)
     if index < 0 or index >= len(orders):
         await message_or_cb.answer("Ошибка отображения заказов.")
         return
@@ -249,6 +267,7 @@ async def navigate_all_orders(callback: CallbackQuery, state: FSMContext):
 
 @router.callback_query(F.data.startswith("switch_status:"))
 async def switch_status_handler(callback: CallbackQuery, state: FSMContext):
+    """Смена статуса заказов"""
     await callback.message.edit_text(f"Задайте новый статус заказа:", reply_markup=status_order_keyboard())
 
 
