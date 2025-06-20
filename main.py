@@ -1,10 +1,10 @@
+import asyncio
 import logging
 
 from aiogram import Bot, Dispatcher
 
 from config.settings import BOT_TOKEN
 from handlers import command, registration_handlers, menu_handlers, basket_handlers, order_handlers, admin_handlers
-import asyncio
 
 
 async def main():
